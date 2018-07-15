@@ -6,7 +6,7 @@ module BitList
   , fromList
   , inits
   , length
-  , lengthAtMost
+  , lengthExceeds
   , null
   , popFront
   , toList
@@ -67,8 +67,8 @@ length (BitList x) = fromIntegral (W# (sizeInBaseInteger x 2#)) - 1
 null :: BitList -> Bool
 null (BitList x) = x <= 1
 
-lengthAtMost :: BitList -> Int -> Bool
-lengthAtMost (BitList x) k = x < bit k
+lengthExceeds :: BitList -> Int -> Bool
+lengthExceeds (BitList x) k = x >= bit k
 
 popFront :: BitList -> Maybe (Bool, BitList)
 popFront bl@(BitList x) = case length bl of

@@ -45,11 +45,11 @@ startsLen = memo go
     Cons Two r ->
       let (fstgrp, sndgrp) =
             (startsLen r, startsLen (flipStarts r))
-              `using` (if tooSmall r then r0 else parTuple2 rseq rseq)
+              `using` (if parallelize r then parTuple2 rseq rseq else r0)
       in  fstgrp + sndgrp
 
-tooSmall :: Starts -> Bool
-tooSmall = (`Starts.lengthAtMost` 30)
+parallelize :: Starts -> Bool
+parallelize = (`Starts.lengthExceeds` 30)
 
 flipStarts :: Starts -> Starts
 flipStarts ts =

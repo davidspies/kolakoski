@@ -5,7 +5,7 @@ module Starts
   , fromList
   , inits
   , length
-  , lengthAtMost
+  , lengthExceeds
   , toList
   , zipToggle
   )
@@ -46,8 +46,8 @@ fromList = Starts . BitList.fromList . map termToBool
 length :: Starts -> Int
 length (Starts xs) = BitList.length xs
 
-lengthAtMost :: Starts -> Int -> Bool
-lengthAtMost (Starts xs) n = xs `BitList.lengthAtMost` n
+lengthExceeds :: Starts -> Int -> Bool
+lengthExceeds (Starts xs) n = xs `BitList.lengthExceeds` n
 
 inits :: Starts -> [Starts]
 inits (Starts ts) = map Starts $ BitList.inits ts
