@@ -23,6 +23,7 @@ dependencies:
 - base >= 4.7 && < 5
 - MemoTrie
 - QuickCheck
+- integer-gmp
 - parallel
 
 library:
@@ -31,7 +32,6 @@ library:
 ghc-options: -Wall -Werror
 
 default-extensions:
-  - DeriveGeneric
   - LambdaCase
   - TypeFamilies
   - TypeOperators

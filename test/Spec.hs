@@ -1,6 +1,7 @@
 import           Lib
 import           Test.Hspec
 import           Test.QuickCheck
+import           Starts                         ( Starts )
 
 prop_correctLength :: Starts -> Property
 prop_correctLength ts = startsLen ts === toInteger (length $ fromStarts ts)
