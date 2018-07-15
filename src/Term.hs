@@ -1,25 +1,19 @@
-module Term
-  ( Term(..)
-  , boolToTerm
-  , termToBool
-  , termToInt
-  )
-where
+module Term where
 
 data Term = One | Two
   deriving (Eq, Show)
 
-termToInt :: Term -> Int
-termToInt = \case
+toInt :: Term -> Int
+toInt = \case
   One -> 1
   Two -> 2
 
-boolToTerm :: Bool -> Term
-boolToTerm = \case
+fromBool :: Bool -> Term
+fromBool = \case
   False -> One
   True  -> Two
 
-termToBool :: Term -> Bool
-termToBool = \case
+toBool :: Term -> Bool
+toBool = \case
   One -> False
   Two -> True

@@ -8,16 +8,18 @@ module Lib
 where
 
 import           Control.Parallel.Strategies
-import           Data.List
+import           Data.List                      ( find )
 import           Data.Maybe                     ( fromJust )
-import           Data.MemoTrie
+import           Data.MemoTrie                  ( memo )
 
-import           Term
-import           Starts
+import qualified Term
+import           Term                           ( Term(One, Two) )
+import qualified Starts
+import           Starts                         ( Starts )
 
 step :: [Term] -> Term -> [Term]
 step current nextStart =
-  concat $ zipWith (replicate . termToInt) current (cycleFrom nextStart)
+  concat $ zipWith (replicate . Term.toInt) current (cycleFrom nextStart)
 
 cycleFrom :: Term -> [Term]
 cycleFrom = \case
@@ -27,7 +29,7 @@ cycleFrom = \case
 kolakoski :: [Term]
 kolakoski = One : Two : xs
  where
-  xs = Two : concat (zipWith (replicate . termToInt) xs (cycle [One, Two]))
+  xs = Two : concat (zipWith (replicate . Term.toInt) xs (cycle [One, Two]))
 
 fromStarts :: Starts -> [Term]
 fromStarts = foldl step [One] . Starts.toList
@@ -38,9 +40,11 @@ data CaseStarts = Single Term | Multi Starts Starts
 breakDown :: Starts -> CaseStarts
 breakDown starts = case Starts.popFront starts of
   Nothing -> Single One
-  Just r | starts `Starts.lengthExceeds` 1 -> Multi r (zipToggle r whichOdds)
+  Just r | starts `Starts.lengthExceeds` 1 -> Multi
+    r
+    (Starts.zipToggle r whichOdds)
    where
-    whichOdds = map (odd . startsLen . fromJust . popFront)
+    whichOdds = map (odd . startsLen . fromJust . Starts.popFront)
                     (init $ tail $ Starts.inits starts)
   Just _ -> Single Two
 

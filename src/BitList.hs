@@ -16,7 +16,7 @@ import           Prelude                 hiding ( length )
 
 import           Data.List                      ( foldl' )
 import           Data.Bits
-import           Data.MemoTrie
+import           Data.MemoTrie                  ( HasTrie(..) )
 import           GHC.Exts                       ( Word(W#) )
 import           GHC.Integer.GMP.Internals      ( sizeInBaseInteger )
 import           Test.QuickCheck                ( Arbitrary(..) )

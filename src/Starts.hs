@@ -20,7 +20,8 @@ import           Data.Bifunctor                 ( first )
 
 import           BitList                        ( BitList )
 import qualified BitList
-import           Term
+import           Term                           ( Term )
+import qualified Term
 
 newtype Starts = Starts BitList
 
@@ -41,7 +42,7 @@ instance HasTrie Starts where
   enumerate (StartsTrie t) = map (first Starts) (enumerate t)
 
 fromList :: [Term] -> Starts
-fromList = Starts . BitList.fromList . map termToBool
+fromList = Starts . BitList.fromList . map Term.toBool
 
 length :: Starts -> Int
 length (Starts xs) = BitList.length xs
@@ -56,7 +57,7 @@ popFront :: Starts -> Maybe Starts
 popFront (Starts ts) = Starts <$> BitList.popFront ts
 
 toList :: Starts -> [Term]
-toList (Starts x) = map boolToTerm $ BitList.toList x
+toList (Starts x) = map Term.fromBool $ BitList.toList x
 
 zipToggle :: Starts -> [Bool] -> Starts
 zipToggle (Starts x) bs = Starts $ x `xor` BitList.fromList bs
