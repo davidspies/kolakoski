@@ -7,7 +7,6 @@ module Lib
   )
 where
 
-import           Control.Category               ( (>>>) )
 import           Control.Parallel.Strategies
 import           Data.List
 import           Data.Maybe                     ( fromJust )
@@ -31,30 +30,33 @@ kolakoski = One : Two : xs
   xs = Two : concat (zipWith (replicate . termToInt) xs (cycle [One, Two]))
 
 fromStarts :: Starts -> [Term]
-fromStarts = Starts.toList >>> \case
-  []         -> []
-  ts@(_ : _) -> foldl step [One] ts
+fromStarts = foldl step [One] . Starts.toList
+
+data CaseStarts = Single Term | Multi Starts Starts
+  deriving (Show)
+
+breakDown :: Starts -> CaseStarts
+breakDown starts = case Starts.popFront starts of
+  Nothing -> Single One
+  Just r | starts `Starts.lengthExceeds` 1 -> Multi r (zipToggle r whichOdds)
+   where
+    whichOdds = map (odd . startsLen . fromJust . popFront)
+                    (init $ tail $ Starts.inits starts)
+  Just _ -> Single Two
 
 startsLen :: Starts -> Integer
 startsLen = memo go
  where
-  go = caseStarts >>> \case
-    Empty      -> 0
-    Single _   -> 1
-    Cons One r -> startsLen r
-    Cons Two r ->
-      let (fstgrp, sndgrp) =
-            (startsLen r, startsLen (flipStarts r))
-              `using` (if parallelize r then parTuple2 rseq rseq else r0)
-      in  fstgrp + sndgrp
+  go x = case breakDown x of
+    Single _ -> 1
+    Multi fstgrp sndgrp ->
+      let (fstlen, sndlen) =
+            (startsLen fstgrp, startsLen sndgrp)
+              `using` (if parallelize x then parTuple2 rseq rseq else r0)
+      in  max 1 (fstlen + sndlen)
 
 parallelize :: Starts -> Bool
 parallelize = (`Starts.lengthExceeds` 30)
-
-flipStarts :: Starts -> Starts
-flipStarts ts =
-  let whichOdds = map (odd . startsLen) (init $ Starts.inits ts)
-  in  zipToggle ts whichOdds
 
 growRepeat :: a -> [[a]]
 growRepeat x = res where res = [x] : map (x :) res
@@ -70,10 +72,8 @@ getKol n = case compare n 0 of
     where starts = fromJust $ find ((n - 1 <) . startsLen) twos
 
 posIn :: Starts -> Integer -> Term
-posIn starts n = case caseStarts starts of
-  Empty                        -> error "empty starts"
-  Single t | n == 0            -> t
-  Single _                     -> error "n out of bounds"
-  Cons One r                   -> posIn r n
-  Cons Two r | n < startsLen r -> posIn r n
-  Cons Two r                   -> posIn (flipStarts r) (n - startsLen r)
+posIn starts n = case breakDown starts of
+  Single t | n == 0                     -> t
+  Single _                              -> error "n out of bounds"
+  Multi fstgrp _ | n < startsLen fstgrp -> posIn fstgrp n
+  Multi fstgrp sndgrp                   -> posIn sndgrp (n - startsLen fstgrp)

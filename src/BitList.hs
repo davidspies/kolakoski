@@ -7,16 +7,12 @@ module BitList
   , inits
   , length
   , lengthExceeds
-  , null
   , popFront
   , toList
-  , xorList
   )
 where
 
-import           Prelude                 hiding ( length
-                                                , null
-                                                )
+import           Prelude                 hiding ( length )
 
 import           Data.List                      ( foldl' )
 import           Data.Bits
@@ -26,6 +22,7 @@ import           GHC.Integer.GMP.Internals      ( sizeInBaseInteger )
 import           Test.QuickCheck                ( Arbitrary(..) )
 
 newtype BitList = BitList {unBL :: Integer}
+  deriving (Eq, Bits)
 
 instance Show BitList where
   showsPrec d l = showParen (d > 10) $
@@ -41,41 +38,30 @@ instance HasTrie BitList where
   enumerate (BitListTrie t) = [(BitList n, untrie t n) | n <- [1..]]
 
 empty :: BitList
-empty = BitList 1
-
-appendBits :: Integer -> [Bool] -> Integer
-appendBits = foldl' (\i b -> (i `shiftL` 1) .|. (if b then 1 else 0))
+empty = BitList 0
 
 fromList :: [Bool] -> BitList
-fromList = BitList . (1 `appendBits`)
+fromList = BitList . foldl' (\i b -> (i `shiftL` 1) .|. (if b then 1 else 0)) 0
 
 toList :: BitList -> [Bool]
 toList = go [] . unBL
  where
   go :: [Bool] -> Integer -> [Bool]
   go accum = \case
-    1 -> accum
+    0 -> accum
     n -> go (testBit n 0 : accum) (n `shiftR` 1)
 
--- Length of rhs must be at most length of lhs. Precondition is not checked.
-xorList :: BitList -> [Bool] -> BitList
-xorList (BitList x) = BitList . (x `xor`) . (0 `appendBits`)
-
 length :: BitList -> Int
-length (BitList x) = fromIntegral (W# (sizeInBaseInteger x 2#)) - 1
-
-null :: BitList -> Bool
-null (BitList x) = x <= 1
+length (BitList x) | x == 0    = 0
+                   | otherwise = fromIntegral (W# (sizeInBaseInteger x 2#))
 
 lengthExceeds :: BitList -> Int -> Bool
 lengthExceeds (BitList x) k = x >= bit k
 
-popFront :: BitList -> Maybe (Bool, BitList)
+popFront :: BitList -> Maybe BitList
 popFront bl@(BitList x) = case length bl of
   0 -> Nothing
-  n ->
-    let b = x `testBit` (n - 1)
-    in  Just (b, BitList $ x `clearBit` n `setBit` (n - 1))
+  n -> Just $ BitList $ x `clearBit` (n - 1)
 
 inits :: BitList -> [BitList]
 inits (BitList x) =

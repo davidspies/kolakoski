@@ -1,11 +1,10 @@
 module Starts
-  ( CaseStarts(..)
-  , Starts
-  , caseStarts
+  ( Starts
   , fromList
   , inits
   , length
   , lengthExceeds
+  , popFront
   , toList
   , zipToggle
   )
@@ -14,6 +13,7 @@ where
 import           Prelude                 hiding ( length )
 
 import           Data.MemoTrie                  ( HasTrie(..) )
+import           Data.Bits                      ( xor )
 import           Test.QuickCheck                ( Arbitrary(..) )
 import qualified Test.QuickCheck               as QuickCheck
 import           Data.Bifunctor                 ( first )
@@ -52,17 +52,11 @@ lengthExceeds (Starts xs) n = xs `BitList.lengthExceeds` n
 inits :: Starts -> [Starts]
 inits (Starts ts) = map Starts $ BitList.inits ts
 
-data CaseStarts = Empty | Single Term | Cons Term Starts
-  deriving (Show)
-
-caseStarts :: Starts -> CaseStarts
-caseStarts (Starts starts) = case BitList.popFront starts of
-  Nothing                      -> Empty
-  Just (b, r) | BitList.null r -> Single (boolToTerm b)
-  Just (b, r)                  -> Cons (boolToTerm b) (Starts r)
+popFront :: Starts -> Maybe Starts
+popFront (Starts ts) = Starts <$> BitList.popFront ts
 
 toList :: Starts -> [Term]
 toList (Starts x) = map boolToTerm $ BitList.toList x
 
 zipToggle :: Starts -> [Bool] -> Starts
-zipToggle (Starts x) bs = Starts $ x `BitList.xorList` bs
+zipToggle (Starts x) bs = Starts $ x `xor` BitList.fromList bs
