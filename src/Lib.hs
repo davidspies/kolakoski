@@ -64,7 +64,7 @@ twos = map Starts.fromList $ growRepeat Two
 
 getKol :: Integer -> Term
 getKol n = case compare n 0 of
-  LT -> error "Must be positive"
+  LT -> error "Must be non-negative"
   EQ -> One
   GT -> posIn starts (n - 1)
     where starts = fromJust $ find ((n - 1 <) . startsLen) twos
