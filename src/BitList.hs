@@ -1,24 +1,16 @@
-{-# LANGUAGE MagicHash #-}
-
 module BitList
   ( BitList
   , empty
   , fromList
-  , length
   , lengthExceeds
-  , popFront
   , initReverseInits
   , toList
   )
 where
 
-import           Prelude                 hiding ( length )
-
 import           Data.List                      ( foldl' )
 import           Data.Bits
 import           Data.MemoTrie                  ( HasTrie(..) )
-import           GHC.Exts                       ( Word(W#) )
-import           GHC.Integer.GMP.Internals      ( sizeInBaseInteger )
 import           Test.QuickCheck                ( Arbitrary(..) )
 
 newtype BitList = BitList {unBL :: Integer}
@@ -41,7 +33,8 @@ empty :: BitList
 empty = BitList 0
 
 fromList :: [Bool] -> BitList
-fromList = BitList . foldl' (\i b -> (i `shiftL` 1) .|. (if b then 1 else 0)) 0
+fromList =
+  foldl' (\i b -> (if b then (`setBit` 0) else id) (i `shiftL` 1)) zeroBits
 
 toList :: BitList -> [Bool]
 toList = go [] . unBL
@@ -51,18 +44,8 @@ toList = go [] . unBL
     0 -> accum
     n -> go (testBit n 0 : accum) (n `shiftR` 1)
 
-length :: BitList -> Int
-length (BitList x) | x == 0    = 0
-                   | otherwise = fromIntegral (W# (sizeInBaseInteger x 2#))
-
 lengthExceeds :: BitList -> Int -> Bool
 lengthExceeds (BitList x) k = x >= bit k
 
-popFront :: BitList -> BitList
-popFront bl@(BitList x) | n <= 0    = error "empty list"
-                        | otherwise = BitList $ x `clearBit` (n - 1)
-  where n = length bl
-
 initReverseInits :: BitList -> [BitList]
-initReverseInits (BitList x) =
-  map BitList $ takeWhile (> 0) $ iterate (`shiftR` 1) x
+initReverseInits = takeWhile (/= zeroBits) . iterate (`shiftR` 1)

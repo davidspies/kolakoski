@@ -1,19 +1,16 @@
 module Starts
   ( Starts
+  , dropTermAt
   , fromList
-  , length
-  , lengthExceeds
-  , popFront
   , initReverseInits
+  , lengthExceeds
   , toList
   , zipToggle
   )
 where
 
-import           Prelude                 hiding ( length )
-
 import           Data.MemoTrie                  ( HasTrie(..) )
-import           Data.Bits                      ( xor )
+import qualified Data.Bits                     as Bits
 import           Test.QuickCheck                ( Arbitrary(..) )
 import qualified Test.QuickCheck               as QuickCheck
 import           Data.Bifunctor                 ( first )
@@ -45,20 +42,17 @@ instance HasTrie Starts where
 fromList :: [Term] -> Starts
 fromList = Starts . BitList.fromList . map Term.toBool
 
-length :: Starts -> Int
-length (Starts xs) = BitList.length xs
-
 lengthExceeds :: Starts -> Int -> Bool
 lengthExceeds (Starts xs) n = xs `BitList.lengthExceeds` n
 
 initReverseInits :: Starts -> [Starts]
 initReverseInits (Starts ts) = map Starts $ BitList.initReverseInits ts
 
-popFront :: Starts -> Starts
-popFront (Starts ts) = Starts $ BitList.popFront ts
+dropTermAt :: Starts -> Int -> Starts
+dropTermAt (Starts x) = Starts . Bits.clearBit x
 
 toList :: Starts -> [Term]
 toList (Starts x) = map Term.fromBool $ BitList.toList x
 
 zipToggle :: Starts -> [Bool] -> Starts
-zipToggle (Starts x) bs = Starts $ x `xor` BitList.fromList bs
+zipToggle (Starts x) bs = Starts $ x `Bits.xor` BitList.fromList bs

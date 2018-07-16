@@ -43,7 +43,8 @@ breakDown starts = case Starts.initReverseInits starts of
   [   _        ] -> Single Two
   xs@(_ : _ : _) -> Multi y (Starts.zipToggle y whichOdds)
    where
-    y : ys    = map Starts.popFront xs
+    lx        = length xs
+    y : ys    = zipWith Starts.dropTermAt xs [lx - 1, lx - 2 ..]
     whichOdds = map (odd . startsLen) (tail $ reverse ys)
 
 startsLen :: Starts -> Integer

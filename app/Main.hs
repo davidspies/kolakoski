@@ -12,8 +12,8 @@ main = do
     []         -> twos
     [     arg] -> take (read arg) twos
     _ : _ :  _ -> error "Too many arguments"
-  forM_ golist
-    $ \x -> putStrLn $ unwords [show (Starts.length x), show (startsLen x)]
+  forM_ golist $ \x ->
+    putStrLn $ unwords [show (length $ Starts.toList x), show (startsLen x)]
 
 (<&>) :: Functor f => f a -> (a -> b) -> f b
 (<&>) = flip (<$>)
