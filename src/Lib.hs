@@ -38,15 +38,13 @@ data CaseStarts = Single Term | Multi Starts Starts
   deriving (Show)
 
 breakDown :: Starts -> CaseStarts
-breakDown starts = case Starts.popFront starts of
-  Nothing -> Single One
-  Just r | starts `Starts.lengthExceeds` 1 -> Multi
-    r
-    (Starts.zipToggle r whichOdds)
+breakDown starts = case Starts.initReverseInits starts of
+  []             -> Single One
+  [   _        ] -> Single Two
+  xs@(_ : _ : _) -> Multi y (Starts.zipToggle y whichOdds)
    where
-    whichOdds = map (odd . startsLen . fromJust . Starts.popFront)
-                    (init $ tail $ Starts.inits starts)
-  Just _ -> Single Two
+    y : ys    = map Starts.popFront xs
+    whichOdds = map (odd . startsLen) (tail $ reverse ys)
 
 startsLen :: Starts -> Integer
 startsLen = memo go

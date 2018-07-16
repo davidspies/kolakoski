@@ -1,10 +1,10 @@
 module Starts
   ( Starts
   , fromList
-  , inits
   , length
   , lengthExceeds
   , popFront
+  , initReverseInits
   , toList
   , zipToggle
   )
@@ -24,6 +24,7 @@ import           Term                           ( Term )
 import qualified Term
 
 newtype Starts = Starts BitList
+  deriving (Eq)
 
 instance Show Starts where
   showsPrec d l = showParen (d > 10) $
@@ -50,11 +51,11 @@ length (Starts xs) = BitList.length xs
 lengthExceeds :: Starts -> Int -> Bool
 lengthExceeds (Starts xs) n = xs `BitList.lengthExceeds` n
 
-inits :: Starts -> [Starts]
-inits (Starts ts) = map Starts $ BitList.inits ts
+initReverseInits :: Starts -> [Starts]
+initReverseInits (Starts ts) = map Starts $ BitList.initReverseInits ts
 
-popFront :: Starts -> Maybe Starts
-popFront (Starts ts) = Starts <$> BitList.popFront ts
+popFront :: Starts -> Starts
+popFront (Starts ts) = Starts $ BitList.popFront ts
 
 toList :: Starts -> [Term]
 toList (Starts x) = map Term.fromBool $ BitList.toList x

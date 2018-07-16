@@ -4,10 +4,10 @@ module BitList
   ( BitList
   , empty
   , fromList
-  , inits
   , length
   , lengthExceeds
   , popFront
+  , initReverseInits
   , toList
   )
 where
@@ -58,11 +58,11 @@ length (BitList x) | x == 0    = 0
 lengthExceeds :: BitList -> Int -> Bool
 lengthExceeds (BitList x) k = x >= bit k
 
-popFront :: BitList -> Maybe BitList
-popFront bl@(BitList x) = case length bl of
-  0 -> Nothing
-  n -> Just $ BitList $ x `clearBit` (n - 1)
+popFront :: BitList -> BitList
+popFront bl@(BitList x) | n <= 0    = error "empty list"
+                        | otherwise = BitList $ x `clearBit` (n - 1)
+  where n = length bl
 
-inits :: BitList -> [BitList]
-inits (BitList x) =
-  reverse $ map BitList $ takeWhile (> 0) $ iterate (`shiftR` 1) x
+initReverseInits :: BitList -> [BitList]
+initReverseInits (BitList x) =
+  map BitList $ takeWhile (> 0) $ iterate (`shiftR` 1) x
