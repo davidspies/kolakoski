@@ -27,7 +27,7 @@ instance HasTrie BitList where
   newtype BitList :->: b = BitListTrie (Integer :->: b)
   trie f = BitListTrie $ trie (f . BitList)
   untrie (BitListTrie t) (BitList x) = untrie t x
-  enumerate (BitListTrie t) = [(BitList n, untrie t n) | n <- [1..]]
+  enumerate (BitListTrie t) = [(BitList n, untrie t n) | n <- [0..]]
 
 empty :: BitList
 empty = BitList 0
