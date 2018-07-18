@@ -1,6 +1,5 @@
 module BitList
   ( BitList
-  , empty
   , fromList
   , lengthExceeds
   , initReverseInits
@@ -28,9 +27,6 @@ instance HasTrie BitList where
   trie f = BitListTrie $ trie (f . BitList)
   untrie (BitListTrie t) (BitList x) = untrie t x
   enumerate (BitListTrie t) = [(BitList n, untrie t n) | n <- [0..]]
-
-empty :: BitList
-empty = BitList 0
 
 fromList :: [Bool] -> BitList
 fromList =
